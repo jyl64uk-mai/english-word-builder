@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>English Word Builder</title>
+<style>
+*{box-sizing:border-box}body{font-family:system-ui,Arial,sans-serif;background:#f4f6fb;color:#202536;margin:0;padding:20px}
+main{max-width:760px;margin:auto;background:white;padding:24px;border-radius:18px;box-shadow:0 8px 30px #17255412}
+h1{margin:0 0 8px;font-size:26px} .muted{color:#687084}
+input,button{font:inherit;padding:11px 13px;border-radius:10px;border:1px solid #d6dbe7}
+input{min-width:0}button{cursor:pointer;background:#243b80;color:white;border:0;font-weight:600}button.secondary{background:#edf0f8;color:#243b80}
+button:disabled{opacity:.45;cursor:default}.row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.row input{flex:1}
+section{margin-top:22px;padding-top:18px;border-top:1px solid #e6e9f0}
+#prompt{font-size:24px;font-weight:700;text-align:center;margin:18px 0 4px}
+#hint{text-align:center;color:#687084}
+#answer,#tiles{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:16px 0;min-height:48px}
+.letter{width:42px;height:46px;padding:0;background:#edf0f8;color:#243b80;border:1px solid #d8deee;font-size:21px}
+#speakRow{display:flex;justify-content:center;min-height:42px;margin:8px 0}
+#speakWord{font-size:19px;padding:8px 16px;border-radius:999px}
+#speakWord:focus-visible{outline:3px solid #9bb7ff;outline-offset:2px}
+.slot{background:white;color:#252b3a;border:2px dashed #c9d0df}
+.slot.filled{border-style:solid;background:#f5f7fc}
+.slot.wrong{background:#ffe3e3;border-color:#e34b4b;color:#b42323}
+.slot.correct{background:#dcfce7;border-color:#22a05a;color:#166534}
+#feedback{text-align:center;font-weight:700;min-height:24px}
+table{width:100%;border-collapse:collapse;margin-top:10px}td,th{text-align:left;padding:8px;border-bottom:1px solid #e6e9f0}td:last-child{text-align:right}
+.small{font-size:13px}.hidden{display:none}
+
+#quest{background:linear-gradient(135deg,#fff7d6,#fff0c2);border:1px solid #f3d77c;border-radius:16px;padding:16px;margin:18px 0}
+.quest-top{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+#dailyProgress{height:14px;background:#f1e3b2;border-radius:99px;overflow:hidden;margin:10px 0}
+#dailyBar{height:100%;width:0;background:linear-gradient(90deg,#f5a623,#f6c844);transition:width .25s}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.stat{background:#fff;border:1px solid #f0d98d;border-radius:10px;padding:8px 12px;font-weight:700}
+#rewardMessage{font-weight:700;color:#8a5a00;min-height:22px}
+.set-completion{margin:18px 0 10px;padding:20px 14px;text-align:center;border-radius:16px;background:linear-gradient(135deg,#fff7d6,#ffedb0);border:2px solid #f1ce65;color:#684600}
+.set-completion-title{font-size:clamp(25px,6vw,34px);line-height:1.15;font-weight:900;letter-spacing:.02em;margin-bottom:12px}
+.set-completion-score{font-size:clamp(34px,9vw,48px);line-height:1.1;font-weight:900;margin:8px 0 6px;font-variant-numeric:tabular-nums}
+.set-completion-score.score-red{color:#d62828}.set-completion-score.score-orange{color:#e87516}.set-completion-score.score-yellow{color:#b58a00}.set-completion-score.score-green{color:#16803c}
+.set-completion-caption{font-size:15px;font-weight:700;color:#684600}
+.practiced-check{color:#16803c;font-size:1.15em;font-weight:900;margin-left:7px;white-space:nowrap}
+
+</style>
+</head>
+<body><main>
+<h1>English Word Builder</h1>
+<p class="muted">Додавай слова з перекладом і тренуй написання: складай слово з літер.</p>
+
+<section id="quest" style="border:0;padding-top:0;margin-top:18px">
+<div class="quest-top"><div><h2 style="margin:0">🏆 Місія дня</h2><div class="muted">Складай слова, отримуй зірки та підтримуй серію!</div></div>
+<div>Мета: <select id="dailyGoal" style="padding:8px;border-radius:8px"><option value="5">5 слів</option><option value="10" selected>10 слів</option><option value="15">15 слів</option><option value="20">20 слів</option><option value="30">30 слів</option></select></div></div>
+<div id="dailyProgress"><div id="dailyBar"></div></div>
+<div id="dailyText">Сьогодні: 0 / 10 слів</div>
+<div class="stats"><div class="stat">⭐ Зірки: <span id="stars">0</span></div><div class="stat">🔥 Серія: <span id="streak">0</span> днів</div><div class="stat">🏅 Рекорд: <span id="bestStreak">0</span> днів</div></div>
+<div id="rewardMessage"></div>
+</section>
+<section>
+<h2>Тренування</h2>
+<div class="row"><label>Розмір набору: <select id="setSize"><option value="10" selected>10 слів</option><option value="20">20 слів</option><option value="all">Усі слова</option></select></label><label>Набір: <select id="setNumber"></select></label><button id="startSet">Почати набір</button></div><div id="setStatus" class="small muted">Набори формуються послідовно зі словника, після чого порядок слів у вибраному наборі перемішується.</div>
+<div class="row"><label><input type="checkbox" id="speechEnabled" checked> Дозволити озвучення складеного слова</label></div>
+<div class="row"><label><input type="checkbox" id="extraLetters"> Додавати зайві літери</label><label>Кількість: <input type="number" id="extraCount" min="1" max="20" value="3" style="width:76px" disabled></label></div>
+<div id="prompt">Додай слова до словника</div><div id="hint"></div>
+<div id="answer"></div><div id="speakRow" class="hidden"><button id="speakWord" class="secondary" type="button" aria-label="Прослухати складене слово" title="Прослухати складене слово">🔊 Прослухати слово</button></div><div id="tiles"></div>
+<div class="row" style="justify-content:center"><button id="check">Перевірити</button><button class="secondary" id="clear">Очистити</button></div>
+<div id="feedback"></div>
+<p class="small muted" style="text-align:center">Натискай на літери внізу, щоб додати їх до відповіді. Натисни на літеру у відповіді, щоб повернути її.</p>
+<div class="row" style="justify-content:center;margin-top:16px"><button class="secondary" id="export">Експорт словника</button></div>
+</section>
+<section style="border:0;padding-top:0;margin-top:18px">
+<h2>Мій словник</h2>
+<div class="row"><input id="word" placeholder="Англійське слово (наприклад, because)"><input id="translation" placeholder="Переклад (наприклад, тому що)"></div>
+<div class="row"><button id="add">Додати слово</button><button class="secondary" id="import">Відкрити імпорт</button><button class="secondary" id="deleteAll">Видалити всі слова</button></div>
+<p class="small muted">Для імпорту: одне слово в рядку у форматі <code>word — переклад</code>.</p>
+<textarea id="bulk" class="hidden" style="width:100%;height:110px;padding:10px;border:1px solid #d6dbe7;border-radius:10px" placeholder="apple — яблуко&#10;school — школа"></textarea>
+<div id="vocab"></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const baseWords=[{"word": "Forward", "translation": "Уперед"}, {"word": "Backward", "translation": "Назад"}, {"word": "Left", "translation": "Ліворуч / лівий"}, {"word": "Right", "translation": "Праворуч / правий"}, {"word": "Up", "translation": "Угору"}, {"word": "Down", "translation": "Униз"}, {"word": "Here", "translation": "Тут"}, {"word": "There", "translation": "Там"}, {"word": "Today", "translation": "Сьогодні"}, {"word": "Yesterday", "translation": "Учора"}, {"word": "Tomorrow", "translation": "Завтра"}, {"word": "Now", "translation": "Зараз"}, {"word": "Later", "translation": "Пізніше"}, {"word": "Before", "translation": "До / раніше"}, {"word": "After", "translation": "Після"}, {"word": "Go", "translation": "Іти / їхати"}, {"word": "Come", "translation": "Приходити"}, {"word": "Do", "translation": "Робити"}, {"word": "Make", "translation": "Створювати / робити"}, {"word": "Get", "translation": "Отримувати"}, {"word": "Give", "translation": "Давати"}, {"word": "Take", "translation": "Брати"}, {"word": "See", "translation": "Бачити"}, {"word": "Look", "translation": "Дивитися"}, {"word": "Want", "translation": "Хотіти"}, {"word": "Need", "translation": "Потребувати"}, {"word": "Know", "translation": "Знати"}, {"word": "Think", "translation": "Думати"}, {"word": "Eat", "translation": "Їсти"}, {"word": "Drink", "translation": "Пити"}, {"word": "Stop", "translation": "Зупинятися"}, {"word": "Start", "translation": "Починати"}, {"word": "Run", "translation": "Бігти"}, {"word": "Walk", "translation": "Ходити"}, {"word": "Jump", "translation": "Стрибати"}, {"word": "Sit", "translation": "Сидіти"}, {"word": "Stand", "translation": "Стояти"}, {"word": "Open", "translation": "Відкривати"}, {"word": "Close", "translation": "Закривати"}, {"word": "Help", "translation": "Допомагати"}, {"word": "Say", "translation": "Сказати"}, {"word": "Tell", "translation": "Розповідати"}, {"word": "Speak", "translation": "Говорити"}, {"word": "Ask", "translation": "Запитувати"}, {"word": "Answer", "translation": "Відповідати"}, {"word": "Read", "translation": "Читати"}, {"word": "Write", "translation": "Писати"}, {"word": "Play", "translation": "Грати"}, {"word": "Work", "translation": "Працювати"}, {"word": "Learn", "translation": "Навчатися"}, {"word": "Big", "translation": "Великий"}, {"word": "Small", "translation": "Маленький"}, {"word": "Large", "translation": "Великий"}, {"word": "Little", "translation": "Маленький"}, {"word": "Long", "translation": "Довгий"}, {"word": "Short", "translation": "Короткий / низький"}, {"word": "Tall", "translation": "Високий"}, {"word": "New", "translation": "Новий"}, {"word": "Old", "translation": "Старий"}, {"word": "Young", "translation": "Молодий"}, {"word": "Good", "translation": "Хороший"}, {"word": "Bad", "translation": "Поганий"}, {"word": "Nice", "translation": "Приємний / милий"}, {"word": "Beautiful", "translation": "Гарний"}, {"word": "Ugly", "translation": "Негарний"}, {"word": "Happy", "translation": "Щасливий"}, {"word": "Sad", "translation": "Сумний"}, {"word": "Funny", "translation": "Смішний"}, {"word": "Angry", "translation": "Злий"}, {"word": "Kind", "translation": "Добрий"}, {"word": "Hot", "translation": "Гарячий"}, {"word": "Cold", "translation": "Холодний"}, {"word": "Warm", "translation": "Теплий"}, {"word": "Cool", "translation": "Прохолодний / крутий"}, {"word": "Fast", "translation": "Швидкий"}, {"word": "Slow", "translation": "Повільний"}, {"word": "Easy", "translation": "Легкий / простий"}, {"word": "Difficult", "translation": "Складний"}, {"word": "Strong", "translation": "Сильний"}, {"word": "Weak", "translation": "Слабкий"}];
+let vocab=JSON.parse(localStorage.getItem('wordbuilder_vocab')||'[]');
+// Keep explicit deletions across page reloads so default words are not silently restored.
+let deletedWords=new Set(JSON.parse(localStorage.getItem('wordbuilder_deleted_words')||'[]'));
+let known=new Set(vocab.map(x=>x.word.toLowerCase()));
+baseWords.forEach(x=>{let key=x.word.toLowerCase();if(!known.has(key)&&!deletedWords.has(key)){vocab.push(x);known.add(key)}});
+localStorage.setItem('wordbuilder_vocab',JSON.stringify(vocab));
+let current=null, selected=[], checked=false, activeSet=null, setPosition=0, setStats=null, currentSetWordIndex=null, wrongAttempts=0, currentWordSolved=false;
+const todayKey=()=>new Date().toLocaleDateString('en-CA');
+let rewardData=JSON.parse(localStorage.getItem('wordbuilder_rewards')||'{"days":{},"stars":0,"goal":10,"goalBonusDays":[]}');
+if(!rewardData.days)rewardData.days={};if(!rewardData.goalBonusDays)rewardData.goalBonusDays=[];
+$('dailyGoal').value=String(rewardData.goal||10);
+function saveRewards(){localStorage.setItem('wordbuilder_rewards',JSON.stringify(rewardData))}
+function dateShift(date,delta){let d=new Date(date+'T12:00:00');d.setDate(d.getDate()+delta);return d.toLocaleDateString('en-CA')}
+function getStreak(){let d=todayKey(),n=0;while((rewardData.days[d]||0)>=(rewardData.goal||10)){n++;d=dateShift(d,-1)}return n}
+function bestStreak(){let dates=Object.keys(rewardData.days).sort(),best=0,run=0,prev=null;for(let d of dates){if((rewardData.days[d]||0)>=(rewardData.goal||10)){run=prev===dateShift(d,-1)?run+1:1;best=Math.max(best,run);prev=d}else{run=0;prev=d}}return best}
+function renderRewards(){let d=todayKey(),count=rewardData.days[d]||0,goal=rewardData.goal||10; $('dailyBar').style.width=Math.min(100,count/goal*100)+'%';$('dailyText').textContent=`Сьогодні: ${count} / ${goal} слів ${count>=goal?'— мету виконано!':''}`;$('stars').textContent=rewardData.stars||0;$('streak').textContent=getStreak();$('bestStreak').textContent=bestStreak();$('rewardMessage').textContent=count>=goal?'🎉 Місію дня виконано! '+(rewardData.goalBonusDays.includes(d)?'Бонус за мету вже отримано.':''):`Ще ${Math.max(0,goal-count)} слів до денної нагороди!`;}
+function rewardCorrect(points){let d=todayKey();rewardData.days[d]=(rewardData.days[d]||0)+1;rewardData.stars=(rewardData.stars||0)+points;let goal=rewardData.goal||10;if(rewardData.days[d]>=goal&&!rewardData.goalBonusDays.includes(d)){rewardData.stars+=5;rewardData.goalBonusDays.push(d)}saveRewards();renderRewards()}
+// Keep a date-specific list of words correctly completed today.
+let practicedByDay=JSON.parse(localStorage.getItem('wordbuilder_practiced_by_day')||'{}');
+// Older versions marked a word as practiced when it was merely opened; clear today's ambiguous legacy marks once.
+if(!localStorage.getItem('wordbuilder_practice_checkmark_migrated')){delete practicedByDay[todayKey()];localStorage.setItem('wordbuilder_practiced_by_day',JSON.stringify(practicedByDay));localStorage.setItem('wordbuilder_practice_checkmark_migrated','1')}
+function markPracticed(word){let day=todayKey();if(!practicedByDay[day])practicedByDay[day]=[];let key=word.toLowerCase();if(!practicedByDay[day].includes(key)){practicedByDay[day].push(key);localStorage.setItem('wordbuilder_practiced_by_day',JSON.stringify(practicedByDay));renderVocab()}}
+function save(){localStorage.setItem('wordbuilder_vocab',JSON.stringify(vocab));localStorage.setItem('wordbuilder_deleted_words',JSON.stringify([...deletedWords]));renderVocab()}
+function renderVocab(){let practiced=new Set(practicedByDay[todayKey()]||[]);$('vocab').innerHTML=vocab.length?`<p><b>${vocab.length}</b> слів <span class="muted small">• ✓ — правильно написано сьогодні</span></p><table><tr><th>Англійською</th><th>Переклад</th><th></th></tr>${vocab.map((x,i)=>`<tr><td>${esc(x.word)}${practiced.has(x.word.toLowerCase())?'<span class="practiced-check" title="Правильно написано сьогодні" aria-label="Правильно написано сьогодні">✓</span>':''}</td><td>${esc(x.translation)}</td><td><button class="secondary" data-del="${i}" aria-label="Видалити слово ${esc(x.word)}">×</button></td></tr>`).join('')}</table>`:'<p class="muted">Словник поки порожній.</p>'; $('vocab').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{let removed=vocab.splice(+b.dataset.del,1)[0];if(removed)deletedWords.add(removed.word.toLowerCase());activeSet=null;current=null;save();updateSetOptions();start()})}
+$('deleteAll').onclick=()=>{if(!vocab.length)return alert('Словник уже порожній.');if(!confirm(`Видалити всі ${vocab.length} слів зі словника? Цю дію неможливо скасувати.`))return;vocab.forEach(x=>deletedWords.add(x.word.toLowerCase()));baseWords.forEach(x=>deletedWords.add(x.word.toLowerCase()));vocab=[];activeSet=null;current=null;save();updateSetOptions();start();$('setStatus').textContent='Словник очищено. Додай або імпортуй нові слова.'};
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+$('add').onclick=()=>{let word=$('word').value.trim(),translation=$('translation').value.trim();if(!word||!translation)return alert('Заповни слово та переклад');let old=vocab.find(x=>x.word.toLowerCase()===word.toLowerCase());if(old)old.translation=translation;else vocab.push({word,translation});deletedWords.delete(word.toLowerCase());$('word').value=$('translation').value='';save();updateSetOptions();activeSet=null;start()};
+$('import').onclick=()=>{let ta=$('bulk'),btn=$('import');if(ta.classList.contains('hidden')){ta.classList.remove('hidden');btn.textContent='Додати слова до словника';ta.focus();return}let lines=ta.value.split(/\r?\n/),added=0,updated=0,skipped=0;lines.forEach(line=>{if(!line.trim())return;let m=line.match(/^\s*(.*?)\s*[—–-]\s*(.*?)\s*$/);if(!m||!m[1].trim()||!m[2].trim()){skipped++;return}let word=m[1].trim(),translation=m[2].trim();deletedWords.delete(word.toLowerCase());let old=vocab.find(x=>x.word.toLowerCase()===word.toLowerCase());if(old){old.translation=translation;updated++}else{vocab.push({word,translation});added++}});ta.value='';ta.classList.add('hidden');btn.textContent='Відкрити імпорт';save();updateSetOptions();activeSet=null;start();alert(`Нових слів: ${added}. Переклади оновлено: ${updated}. Пропущено рядків: ${skipped}. Тепер слова доступні в усіх наборах.`)};
+$('export').onclick=()=>{let txt=vocab.map(x=>x.word+' — '+x.translation).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='english-words.txt';a.click();URL.revokeObjectURL(a.href)};
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function updateSetOptions(){let all=$('setSize').value==='all',size=all?vocab.length:(parseInt($('setSize').value)||10),count=all?1:Math.max(1,Math.ceil(vocab.length/size)),sel=$('setNumber'),old=parseInt(sel.value)||1;sel.innerHTML='';for(let i=1;i<=count;i++){let amount=all?vocab.length:Math.min(size,Math.max(0,vocab.length-(i-1)*size));let o=document.createElement('option');o.value=i;o.textContent=all?`Усі слова (${amount})`:`Набір ${i} (${amount} слів)`;sel.append(o)}sel.value=String(Math.min(old,count))}
+$('setSize').onchange=()=>{activeSet=null;updateSetOptions()};
+$('startSet').onclick=()=>{if(!vocab.length)return alert('Спочатку додай слова до словника');let all=$('setSize').value==='all',size=all?vocab.length:parseInt($('setSize').value),num=parseInt($('setNumber').value)||1;let source=all?[...vocab]:vocab.slice((num-1)*size,num*size);activeSet=shuffle(source);setPosition=0;setStats={total:activeSet.length,firstTryCorrect:0,evaluated:[]};currentSetWordIndex=null;$('setStatus').className='small muted';$('setStatus').textContent=all?`Усі слова: ${activeSet.length}. Порядок перемішано.`:`Набір ${num}: ${activeSet.length} слів. Спочатку вибрано слова за порядком словника, потім їх перемішано.`;startSetWord()};
+function startSetWord(){if(!activeSet||setPosition>=activeSet.length){let total=setStats?.total||0,percent=total?Math.round((setStats.firstTryCorrect/total)*100):0;let tone=percent<=30?'score-red':percent<=70?'score-orange':percent<=90?'score-yellow':'score-green';$('setStatus').className='set-completion';$('setStatus').innerHTML=`<div class="set-completion-title">🏆 ТРЕНУВАННЯ ЗАВЕРШЕНО! 🏆</div><div class="set-completion-score ${tone}">${percent}%</div><div class="set-completion-caption">Слів правильно з першої спроби: ${setStats?.firstTryCorrect||0} із ${total}</div>`;activeSet=null;current=null;currentSetWordIndex=null;$('prompt').textContent='Чудова робота!';$('hint').textContent='';$('answer').innerHTML=$('tiles').innerHTML='';$('speakRow').classList.add('hidden');$('feedback').textContent='';updateCheckButton();return}currentSetWordIndex=setPosition;current=activeSet[setPosition++];prepareCurrent()}
+function prepareCurrent(){if(!current)return;selected=[];checked=false;wrongAttempts=0;currentWordSolved=false;updateCheckButton();$('feedback').textContent='';$('prompt').textContent=current.translation;$('hint').textContent=`(${current.word.length} літер)${activeSet?` • слово ${setPosition} із ${activeSet.length}`:''}`;let letters=[...current.word];let extra=$('extraLetters').checked?Math.max(0,Math.min(20,parseInt($('extraCount').value)||0)):0;const alphabet='abcdefghijklmnopqrstuvwxyz';for(let k=0;k<extra;k++)letters.push(alphabet[Math.floor(Math.random()*alphabet.length)]);shuffle(letters);current.letters=letters.map((ch,i)=>({ch,id:i}));draw()}
+function start(){if(activeSet){startSetWord();return}if(!vocab.length){current=null;$('prompt').textContent='Додай слова до словника';$('hint').textContent='';$('answer').innerHTML=$('tiles').innerHTML='';return}current=vocab[Math.floor(Math.random()*vocab.length)];prepareCurrent()}
+function draw(){if(!current)return;$('answer').innerHTML='';let target=[...current.word];for(let i=0;i<target.length;i++){let b=document.createElement('button');b.className='letter slot'+(selected[i]?' filled':'');b.textContent=selected[i]?.ch||' ';b.onclick=()=>{if(currentWordSolved||!selected[i])return;selected[i]=null;checked=false;$('feedback').textContent='';draw()};$('answer').append(b)}
+$('tiles').innerHTML='';current.letters.forEach((l,i)=>{let b=document.createElement('button');b.className='letter';b.textContent=l.ch;b.disabled=selected.some(x=>x&&x.id===l.id);b.onclick=()=>{if(currentWordSolved)return;let idx=selected.findIndex(x=>!x);if(idx<0)idx=selected.length;if(idx>=[...current.word].length)return;selected[idx]=l;checked=false;$('feedback').textContent='';draw()};$('tiles').append(b)});let complete=selected.filter(Boolean).length===target.length;$('speakRow').classList.toggle('hidden',!complete||!$('speechEnabled').checked);updateCheckButton()}
+function updateCheckButton(){let b=$('check');if(!current){b.textContent='Перевірити';return}if(!checked){b.textContent='Перевірити';return}b.textContent=activeSet?(setPosition>=activeSet.length?'Завершити':'Далі'):'Далі'}
+$('check').onclick=()=>{if(!current)return;if(checked){$('feedback').textContent='';if(activeSet)startSetWord();else start();updateCheckButton();return}if(selected.filter(Boolean).length!==[...current.word].length){$('feedback').textContent='Спочатку використай усі літери.';return}checked=true;let target=[...current.word], slots=$('answer').children, good=true;for(let i=0;i<target.length;i++){let match=selected[i].ch.toLowerCase()===target[i].toLowerCase();slots[i].classList.add(match?'correct':'wrong');if(!match)good=false}if(activeSet&&setStats&&currentSetWordIndex!==null&&!setStats.evaluated.includes(currentSetWordIndex)){setStats.evaluated.push(currentSetWordIndex);if(good)setStats.firstTryCorrect++}if(good){currentWordSolved=true;let points=Math.max(1,5-wrongAttempts);markPracticed(current.word);rewardCorrect(points);speakEnglish(current.word);$('feedback').textContent=`Правильно! +${points} ⭐ Чудово 🎉`}else{wrongAttempts++;$('feedback').textContent='Червоні літери стоять не на своїх місцях. Спробуй ще раз або натисни «Далі».'}updateCheckButton();
+};
+function speakEnglish(text,alertOnUnsupported=false){if(!$('speechEnabled').checked)return false;if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){if(alertOnUnsupported)alert('Цей браузер не підтримує озвучення. Відкрий застосунок у Chrome.');return false}window.speechSynthesis.cancel();let utterance=new SpeechSynthesisUtterance(text);utterance.lang='en-US';utterance.rate=0.85;window.speechSynthesis.speak(utterance);return true}
+$('speakWord').onclick=()=>{if(!current||!$('speechEnabled').checked||selected.filter(Boolean).length!==[...current.word].length)return;speakEnglish(selected.map(x=>x.ch).join(''),true)};
+$('speechEnabled').onchange=()=>{let complete=current&&selected.filter(Boolean).length===[...current.word].length;$('speakRow').classList.toggle('hidden',!complete||!$('speechEnabled').checked);updateCheckButton()};
+$('clear').onclick=()=>{if(currentWordSolved)return;selected=[];checked=false;$('feedback').textContent='';draw();updateCheckButton()};
+$('extraLetters').onchange=()=>{$('extraCount').disabled=!$('extraLetters').checked;if(current)start()};
+$('extraCount').onchange=()=>{if(current&&$('extraLetters').checked)start()};
+
+$('dailyGoal').onchange=()=>{rewardData.goal=parseInt($('dailyGoal').value)||10;saveRewards();renderRewards()};
+updateSetOptions();renderRewards();renderVocab();start();
+</script></body></html>
