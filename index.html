@@ -36,6 +36,10 @@ table{width:100%;border-collapse:collapse;margin-top:10px}td,th{text-align:left;
 .folder-actions button,.word-folder-select{padding:7px 9px;font-size:13px}
 .word-folder-select{max-width:145px}
 .word-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+.dictionary-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 8px}
+.dictionary-controls input,.dictionary-controls select{width:100%;min-width:0;padding:9px 10px;background:#fff}
+.dictionary-count{margin:4px 0 8px}
+@media(max-width:560px){.dictionary-controls{grid-template-columns:1fr}}
 @media(max-width:560px){body{padding:10px}main{padding:16px}.word-actions{flex-wrap:wrap}}
 
 #quest{background:linear-gradient(135deg,#fff7d6,#fff0c2);border:1px solid #f3d77c;border-radius:16px;padding:16px;margin:18px 0}
@@ -90,6 +94,14 @@ table{width:100%;border-collapse:collapse;margin-top:10px}td,th{text-align:left;
 <div class="row"><button id="add">Додати слово</button><button class="secondary" id="import">Відкрити імпорт</button><button class="secondary" id="deleteAll">Видалити всі слова</button></div>
 <p class="small muted">Для імпорту: одне слово в рядку у форматі <code>word — переклад</code>. Усі імпортовані слова потраплять до вибраної папки.</p>
 <textarea id="bulk" class="hidden" style="width:100%;height:110px;padding:10px;border:1px solid #d6dbe7;border-radius:10px" placeholder="apple — яблуко&#10;school — школа"></textarea>
+<div class="dictionary-controls" aria-label="Пошук, фільтр і сортування словника">
+<label class="small">Папка
+<select id="vocabFolderFilter"><option value="all">Усі папки</option></select></label>
+<label class="small">Сортування
+<select id="vocabSort"><option value="word-asc">Англійською: А–Я</option><option value="word-desc">Англійською: Я–А</option><option value="translation-asc">Перекладом: А–Я</option><option value="translation-desc">Перекладом: Я–А</option></select></label>
+<label class="small">Пошук
+<input id="vocabSearch" type="search" placeholder="Слово або переклад"></label>
+</div>
 <div id="vocab"></div>
 </section>
 </main>
@@ -133,9 +145,23 @@ function renderFolderControls(){
  $('folderList').querySelectorAll('[data-rename-folder]').forEach(b=>b.onclick=()=>{let f=folders.find(x=>x.id===b.dataset.renameFolder);if(!f)return;let name=prompt('Нова назва папки:',f.name)?.trim();if(!name)return;if(folders.some(x=>x.id!==f.id&&x.name.toLowerCase()===name.toLowerCase()))return alert('Папка з такою назвою вже існує.');f.name=name;saveFolders();renderFolderControls()});
  $('folderList').querySelectorAll('[data-delete-folder]').forEach(b=>b.onclick=()=>{let f=folders.find(x=>x.id===b.dataset.deleteFolder);if(!f)return;let count=vocab.filter(x=>x.folderId===f.id).length;if(!confirm(`Видалити папку «${f.name}»? ${count} слів буде переміщено до папки «Без папки».`))return;vocab.forEach(x=>{if(x.folderId===f.id)x.folderId='uncategorized'});folders=folders.filter(x=>x.id!==f.id);if($('trainingFolder').value===f.id)$('trainingFolder').value='uncategorized';save();updateSetOptions();if(activeSet){activeSet=null;current=null;start()} });
 }
-function renderVocab(){let practiced=new Set(practicedByDay[todayKey()]||[]);$('vocab').innerHTML=vocab.length?`<p><b>${vocab.length}</b> слів <span class="muted small">• ✓ — правильно написано сьогодні</span></p><table><tr><th>Англійською</th><th>Переклад</th><th>Папка</th><th></th></tr>${vocab.map((x,i)=>`<tr><td>${esc(x.word)}${practiced.has(x.word.toLowerCase())?'<span class="practiced-check" title="Правильно написано сьогодні" aria-label="Правильно написано сьогодні">✓</span>':''}</td><td>${esc(x.translation)}</td><td><select class="word-folder-select" data-move="${i}" aria-label="Папка для ${esc(x.word)}">${folders.map(f=>`<option value="${esc(f.id)}" ${x.folderId===f.id?'selected':''}>${esc(f.name)}</option>`).join('')}</select></td><td><button class="secondary" data-del="${i}" aria-label="Видалити слово ${esc(x.word)}">×</button></td></tr>`).join('')}</table>`:'<p class="muted">Словник поки порожній.</p>';
+// These view settings are intentionally kept only in memory; vocabulary storage is unchanged.
+let vocabViewFolder='all',vocabViewSort='word-asc',vocabViewSearch='';
+function renderVocab(){
+ const practiced=new Set(practicedByDay[todayKey()]||[]);
+ const filter=$('vocabFolderFilter'),sort=$('vocabSort'),search=$('vocabSearch');
+ if(filter){let previous=vocabViewFolder;filter.innerHTML='<option value="all">Усі папки ('+vocab.length+')</option>'+folders.map(f=>`<option value="${esc(f.id)}">${esc(f.name)} (${vocab.filter(x=>x.folderId===f.id).length})</option>`).join('');if([...filter.options].some(o=>o.value===previous))filter.value=previous;else{vocabViewFolder='all';filter.value='all'}}
+ if(sort)sort.value=vocabViewSort;if(search&&search.value!==vocabViewSearch)search.value=vocabViewSearch;
+ const term=vocabViewSearch.trim().toLocaleLowerCase();
+ const visible=vocab.map((x,index)=>({x,index})).filter(({x})=>(vocabViewFolder==='all'||x.folderId===vocabViewFolder)&&(!term||String(x.word).toLocaleLowerCase().includes(term)||String(x.translation).toLocaleLowerCase().includes(term)));
+ const [field,direction]=vocabViewSort.split('-');visible.sort((a,b)=>String(a.x[field==='word'?'word':'translation']).localeCompare(String(b.x[field==='word'?'word':'translation']),field==='word'?'en':'uk',{sensitivity:'base'})*(direction==='desc'?-1:1));
+ $('vocab').innerHTML=vocab.length?`<p class="dictionary-count"><b>${visible.length}</b> із ${vocab.length} слів <span class="muted small">• ✓ — правильно написано сьогодні</span></p>`+(visible.length?`<table><tr><th>Англійською</th><th>Переклад</th><th>Папка</th><th></th></tr>${visible.map(({x,index})=>`<tr><td>${esc(x.word)}${practiced.has(x.word.toLowerCase())?'<span class="practiced-check" title="Правильно написано сьогодні" aria-label="Правильно написано сьогодні">✓</span>':''}</td><td>${esc(x.translation)}</td><td><select class="word-folder-select" data-move="${index}" aria-label="Папка для ${esc(x.word)}">${folders.map(f=>`<option value="${esc(f.id)}" ${x.folderId===f.id?'selected':''}>${esc(f.name)}</option>`).join('')}</select></td><td><button class="secondary" data-del="${index}" aria-label="Видалити слово ${esc(x.word)}">×</button></td></tr>`).join('')}</table>`:'<p class="muted">За вибраними умовами слова не знайдено.</p>'):'<p class="muted">Словник поки порожній.</p>';
  $('vocab').querySelectorAll('[data-move]').forEach(sel=>sel.onchange=()=>{vocab[+sel.dataset.move].folderId=sel.value;save();updateSetOptions()});
- $('vocab').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{let removed=vocab.splice(+b.dataset.del,1)[0];if(removed)deletedWords.add(removed.word.toLowerCase());activeSet=null;current=null;save();updateSetOptions();start()})}
+ $('vocab').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{let removed=vocab.splice(+b.dataset.del,1)[0];if(removed)deletedWords.add(removed.word.toLowerCase());activeSet=null;current=null;save();updateSetOptions();start()});
+}
+$('vocabFolderFilter').onchange=()=>{vocabViewFolder=$('vocabFolderFilter').value;renderVocab()};
+$('vocabSort').onchange=()=>{vocabViewSort=$('vocabSort').value;renderVocab()};
+$('vocabSearch').oninput=()=>{vocabViewSearch=$('vocabSearch').value;renderVocab()};
 $('createFolder').onclick=()=>{let name=$('newFolderName').value.trim();if(!name)return alert('Вкажи назву папки.');if(folders.some(f=>f.name.toLowerCase()===name.toLowerCase()))return alert('Папка з такою назвою вже існує.');let id='folder_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);folders.push({id,name});$('newFolderName').value='';save();renderFolderControls();$('wordFolder').value=id};
 $('deleteAll').onclick=()=>{if(!vocab.length)return alert('Словник уже порожній.');if(!confirm(`Видалити всі ${vocab.length} слів зі словника? Цю дію неможливо скасувати.`))return;vocab.forEach(x=>deletedWords.add(x.word.toLowerCase()));baseWords.forEach(x=>deletedWords.add(x.word.toLowerCase()));vocab=[];activeSet=null;current=null;save();updateSetOptions();start();$('setStatus').textContent='Словник очищено. Додай або імпортуй нові слова.'};
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
