@@ -8,8 +8,10 @@
 *{box-sizing:border-box}body{font-family:system-ui,Arial,sans-serif;background:#f4f6fb;color:#202536;margin:0;padding:20px}
 main{max-width:760px;margin:auto;background:white;padding:24px;border-radius:18px;box-shadow:0 8px 30px #17255412}
 h1{margin:0 0 8px;font-size:26px} .muted{color:#687084}
-input,button{font:inherit;padding:11px 13px;border-radius:10px;border:1px solid #d6dbe7}
-input{min-width:0}button{cursor:pointer;background:#243b80;color:white;border:0;font-weight:600}button.secondary{background:#edf0f8;color:#243b80}
+input,button,select{font:inherit;padding:8px 12px;border-radius:8px;border:1px solid #d6dbe7}
+input{min-width:0}
+select{min-width:0;background:#fff;color:#202536;cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:34px;background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 12 12%27%3E%3Cpath d=%27m2 4 4 4 4-4%27 fill=%27none%27 stroke=%27%23687084%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center}
+select:focus,input:focus{outline:2px solid #9bb7ff;outline-offset:1px}button{cursor:pointer;background:#243b80;color:white;border:0;font-weight:600}button.secondary{background:#edf0f8;color:#243b80}
 button:disabled{opacity:.45;cursor:default}.row{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.row input{flex:1}
 section{margin-top:22px;padding-top:18px;border-top:1px solid #e6e9f0}
 #prompt{font-size:24px;font-weight:700;text-align:center;margin:18px 0 4px}
@@ -33,11 +35,24 @@ table{width:100%;border-collapse:collapse;margin-top:10px}td,th{text-align:left;
 .folder-item-main{display:flex;align-items:center;gap:8px;min-width:0}
 .folder-count{font-size:12px;color:#687084;white-space:nowrap}
 .folder-actions{display:flex;gap:6px;flex-wrap:wrap}
-.folder-actions button,.word-folder-select{padding:7px 9px;font-size:13px}
-.word-folder-select{max-width:145px}
-.word-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+.folder-actions button{padding:7px 9px;font-size:13px}
+button.danger{background:#c62828;color:#fff}
+button.danger:hover{background:#a91f1f}
+.bulk-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0;padding:10px;background:#f7f8fc;border:1px solid #e6e9f0;border-radius:12px}
+.bulk-actions .selection-count{font-size:13px;color:#687084;margin-right:auto}
+.vocab-select{width:18px;height:18px;vertical-align:middle;accent-color:#243b80}
+.vocab-table th:first-child,.vocab-table td:first-child{width:38px;text-align:center}
+.vocab-table td:last-child{text-align:left}
+.modal-backdrop{position:fixed;inset:0;background:#10182899;display:flex;align-items:center;justify-content:center;padding:16px;z-index:1000}
+.modal-backdrop.hidden{display:none}
+.modal-card{width:min(100%,430px);background:#fff;border-radius:16px;padding:20px;box-shadow:0 18px 60px #0003}
+.modal-card h3{margin:0 0 10px}
+.modal-card p{line-height:1.45}
+.modal-card input,.modal-card select{width:100%;margin:8px 0}
+.modal-error{color:#c62828;font-size:13px;min-height:18px}
+.modal-buttons{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:14px}
 .dictionary-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0 8px}
-.dictionary-controls input,.dictionary-controls select{width:100%;min-width:0;padding:9px 10px;background:#fff}
+.dictionary-controls input{width:100%;min-width:0;padding:9px 10px;background:#fff}.dictionary-controls select{width:100%;min-width:0}
 .dictionary-count{margin:4px 0 8px}
 @media(max-width:560px){.dictionary-controls{grid-template-columns:1fr}}
 @media(max-width:560px){body{padding:10px}main{padding:16px}.word-actions{flex-wrap:wrap}}
@@ -64,7 +79,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px}td,th{text-align:left;
 
 <section id="quest" style="border:0;padding-top:0;margin-top:18px">
 <div class="quest-top"><div><h2 style="margin:0">🏆 Місія дня</h2><div class="muted">Складай слова, отримуй зірки та підтримуй серію!</div></div>
-<div>Мета: <select id="dailyGoal" style="padding:8px;border-radius:8px"><option value="5">5 слів</option><option value="10" selected>10 слів</option><option value="15">15 слів</option><option value="20">20 слів</option><option value="30">30 слів</option></select></div></div>
+<div>Мета: <select id="dailyGoal"><option value="5">5 слів</option><option value="10" selected>10 слів</option><option value="15">15 слів</option><option value="20">20 слів</option><option value="30">30 слів</option></select></div></div>
 <div id="dailyProgress"><div id="dailyBar"></div></div>
 <div id="dailyText">Сьогодні: 0 / 10 слів</div>
 <div class="stats"><div class="stat">⭐ Зірки: <span id="stars">0</span></div><div class="stat">🔥 Серія: <span id="streak">0</span> днів</div><div class="stat">🏅 Рекорд: <span id="bestStreak">0</span> днів</div></div>
@@ -80,7 +95,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px}td,th{text-align:left;
 <div class="row" style="justify-content:center"><button id="check">Перевірити</button><button class="secondary" id="clear">Очистити</button></div>
 <div id="feedback"></div>
 <p class="small muted" style="text-align:center">Натискай на літери внізу, щоб додати їх до відповіді. Натисни на літеру у відповіді, щоб повернути її.</p>
-<div class="row" style="justify-content:center;margin-top:16px"><button class="secondary" id="export">Експорт словника</button></div>
+
 </section>
 <section style="border:0;padding-top:0;margin-top:18px">
 <h2>Мій словник</h2>
@@ -89,9 +104,15 @@ table{width:100%;border-collapse:collapse;margin-top:10px}td,th{text-align:left;
 <div class="row"><input id="newFolderName" placeholder="Назва нової папки (наприклад, Animals)"><button id="createFolder">Створити папку</button></div>
 <div id="folderList" class="folder-list"></div>
 </div>
+<div class="folder-tools" id="dictionaryTransfer">
+<h3>Експорт та імпорт словника</h3>
+<p class="small muted">JSON-файл зберігає папки, слова та їхні зв’язки. Статистика й прогрес навчання не змінюються.</p>
+<div class="row"><button type="button" id="exportJson">Експортувати структуру (JSON)</button><button type="button" class="secondary" id="importJson">Імпортувати структуру (JSON)</button></div>
+<input type="file" id="jsonFile" accept=".json,application/json" class="hidden">
+</div>
 <div class="row"><input id="word" placeholder="Англійське слово (наприклад, because)"><input id="translation" placeholder="Переклад (наприклад, тому що)"></div>
 <div class="row"><label>Додати до папки: <select id="wordFolder"></select></label></div>
-<div class="row"><button id="add">Додати слово</button><button class="secondary" id="import">Відкрити імпорт</button><button class="secondary" id="deleteAll">Видалити всі слова</button></div>
+<div class="row"><button id="add">Додати слово</button><button class="secondary" id="import">Відкрити імпорт</button><button class="secondary" id="exportText">Експорт TXT</button><button class="danger" id="deleteAll">Видалити всі слова</button></div>
 <p class="small muted">Для імпорту: одне слово в рядку у форматі <code>word — переклад</code>. Усі імпортовані слова потраплять до вибраної папки.</p>
 <textarea id="bulk" class="hidden" style="width:100%;height:110px;padding:10px;border:1px solid #d6dbe7;border-radius:10px" placeholder="apple — яблуко&#10;school — школа"></textarea>
 <div class="dictionary-controls" aria-label="Пошук, фільтр і сортування словника">
@@ -105,6 +126,13 @@ table{width:100%;border-collapse:collapse;margin-top:10px}td,th{text-align:left;
 <div id="vocab"></div>
 </section>
 </main>
+<div id="actionModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <h3 id="modalTitle"></h3>
+    <div id="modalContent"></div>
+    <div class="modal-buttons" id="modalButtons"></div>
+  </div>
+</div>
 <script>
 const $=id=>document.getElementById(id);
 const baseWords=[{"word": "Forward", "translation": "Уперед"}, {"word": "Backward", "translation": "Назад"}, {"word": "Left", "translation": "Ліворуч / лівий"}, {"word": "Right", "translation": "Праворуч / правий"}, {"word": "Up", "translation": "Угору"}, {"word": "Down", "translation": "Униз"}, {"word": "Here", "translation": "Тут"}, {"word": "There", "translation": "Там"}, {"word": "Today", "translation": "Сьогодні"}, {"word": "Yesterday", "translation": "Учора"}, {"word": "Tomorrow", "translation": "Завтра"}, {"word": "Now", "translation": "Зараз"}, {"word": "Later", "translation": "Пізніше"}, {"word": "Before", "translation": "До / раніше"}, {"word": "After", "translation": "Після"}, {"word": "Go", "translation": "Іти / їхати"}, {"word": "Come", "translation": "Приходити"}, {"word": "Do", "translation": "Робити"}, {"word": "Make", "translation": "Створювати / робити"}, {"word": "Get", "translation": "Отримувати"}, {"word": "Give", "translation": "Давати"}, {"word": "Take", "translation": "Брати"}, {"word": "See", "translation": "Бачити"}, {"word": "Look", "translation": "Дивитися"}, {"word": "Want", "translation": "Хотіти"}, {"word": "Need", "translation": "Потребувати"}, {"word": "Know", "translation": "Знати"}, {"word": "Think", "translation": "Думати"}, {"word": "Eat", "translation": "Їсти"}, {"word": "Drink", "translation": "Пити"}, {"word": "Stop", "translation": "Зупинятися"}, {"word": "Start", "translation": "Починати"}, {"word": "Run", "translation": "Бігти"}, {"word": "Walk", "translation": "Ходити"}, {"word": "Jump", "translation": "Стрибати"}, {"word": "Sit", "translation": "Сидіти"}, {"word": "Stand", "translation": "Стояти"}, {"word": "Open", "translation": "Відкривати"}, {"word": "Close", "translation": "Закривати"}, {"word": "Help", "translation": "Допомагати"}, {"word": "Say", "translation": "Сказати"}, {"word": "Tell", "translation": "Розповідати"}, {"word": "Speak", "translation": "Говорити"}, {"word": "Ask", "translation": "Запитувати"}, {"word": "Answer", "translation": "Відповідати"}, {"word": "Read", "translation": "Читати"}, {"word": "Write", "translation": "Писати"}, {"word": "Play", "translation": "Грати"}, {"word": "Work", "translation": "Працювати"}, {"word": "Learn", "translation": "Навчатися"}, {"word": "Big", "translation": "Великий"}, {"word": "Small", "translation": "Маленький"}, {"word": "Large", "translation": "Великий"}, {"word": "Little", "translation": "Маленький"}, {"word": "Long", "translation": "Довгий"}, {"word": "Short", "translation": "Короткий / низький"}, {"word": "Tall", "translation": "Високий"}, {"word": "New", "translation": "Новий"}, {"word": "Old", "translation": "Старий"}, {"word": "Young", "translation": "Молодий"}, {"word": "Good", "translation": "Хороший"}, {"word": "Bad", "translation": "Поганий"}, {"word": "Nice", "translation": "Приємний / милий"}, {"word": "Beautiful", "translation": "Гарний"}, {"word": "Ugly", "translation": "Негарний"}, {"word": "Happy", "translation": "Щасливий"}, {"word": "Sad", "translation": "Сумний"}, {"word": "Funny", "translation": "Смішний"}, {"word": "Angry", "translation": "Злий"}, {"word": "Kind", "translation": "Добрий"}, {"word": "Hot", "translation": "Гарячий"}, {"word": "Cold", "translation": "Холодний"}, {"word": "Warm", "translation": "Теплий"}, {"word": "Cool", "translation": "Прохолодний / крутий"}, {"word": "Fast", "translation": "Швидкий"}, {"word": "Slow", "translation": "Повільний"}, {"word": "Easy", "translation": "Легкий / простий"}, {"word": "Difficult", "translation": "Складний"}, {"word": "Strong", "translation": "Сильний"}, {"word": "Weak", "translation": "Слабкий"}];
@@ -147,6 +175,23 @@ function renderFolderControls(){
 }
 // These view settings are intentionally kept only in memory; vocabulary storage is unchanged.
 let vocabViewFolder='all',vocabViewSort='word-asc',vocabViewSearch='';
+const selectedWords=new Set();
+function closeActionModal(){$('actionModal').classList.add('hidden');$('modalContent').innerHTML='';$('modalButtons').innerHTML=''}
+function showActionModal(title,content,buttons){
+ $('modalTitle').textContent=title;$('modalContent').innerHTML=content;
+ $('modalButtons').innerHTML=buttons;$('actionModal').classList.remove('hidden');
+ $('modalContent').querySelector('input,select')?.focus();
+}
+function renderBulkActions(){
+ const count=selectedWords.size;
+ const host=$('bulkActions');
+ if(!host)return;
+ host.innerHTML=`<span class="selection-count">Вибрано: <b>${count}</b></span>
+ <button type="button" class="secondary" id="moveSelected" ${count?'':'disabled'}>Перемістити в папку</button>
+ <button type="button" class="danger" id="deleteSelected" ${count?'':'disabled'}>Видалити вибрані</button>`;
+ $('moveSelected').onclick=moveSelectedWords;
+ $('deleteSelected').onclick=deleteSelectedWords;
+}
 function renderVocab(){
  const practiced=new Set(practicedByDay[todayKey()]||[]);
  const filter=$('vocabFolderFilter'),sort=$('vocabSort'),search=$('vocabSearch');
@@ -155,19 +200,110 @@ function renderVocab(){
  const term=vocabViewSearch.trim().toLocaleLowerCase();
  const visible=vocab.map((x,index)=>({x,index})).filter(({x})=>(vocabViewFolder==='all'||x.folderId===vocabViewFolder)&&(!term||String(x.word).toLocaleLowerCase().includes(term)||String(x.translation).toLocaleLowerCase().includes(term)));
  const [field,direction]=vocabViewSort.split('-');visible.sort((a,b)=>String(a.x[field==='word'?'word':'translation']).localeCompare(String(b.x[field==='word'?'word':'translation']),field==='word'?'en':'uk',{sensitivity:'base'})*(direction==='desc'?-1:1));
- $('vocab').innerHTML=vocab.length?`<p class="dictionary-count"><b>${visible.length}</b> із ${vocab.length} слів <span class="muted small">• ✓ — правильно написано сьогодні</span></p>`+(visible.length?`<table><tr><th>Англійською</th><th>Переклад</th><th>Папка</th><th></th></tr>${visible.map(({x,index})=>`<tr><td>${esc(x.word)}${practiced.has(x.word.toLowerCase())?'<span class="practiced-check" title="Правильно написано сьогодні" aria-label="Правильно написано сьогодні">✓</span>':''}</td><td>${esc(x.translation)}</td><td><select class="word-folder-select" data-move="${index}" aria-label="Папка для ${esc(x.word)}">${folders.map(f=>`<option value="${esc(f.id)}" ${x.folderId===f.id?'selected':''}>${esc(f.name)}</option>`).join('')}</select></td><td><button class="secondary" data-del="${index}" aria-label="Видалити слово ${esc(x.word)}">×</button></td></tr>`).join('')}</table>`:'<p class="muted">За вибраними умовами слова не знайдено.</p>'):'<p class="muted">Словник поки порожній.</p>';
- $('vocab').querySelectorAll('[data-move]').forEach(sel=>sel.onchange=()=>{vocab[+sel.dataset.move].folderId=sel.value;save();updateSetOptions()});
- $('vocab').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{let removed=vocab.splice(+b.dataset.del,1)[0];if(removed)deletedWords.add(removed.word.toLowerCase());activeSet=null;current=null;save();updateSetOptions();start()});
+ const selectedVisible=visible.filter(({x})=>selectedWords.has(x)).length;
+ $('vocab').innerHTML=vocab.length?`<p class="dictionary-count"><b>${visible.length}</b> із ${vocab.length} слів <span class="muted small">• ✓ — правильно написано сьогодні</span></p>
+ <div class="bulk-actions" id="bulkActions">
+ <label><input type="checkbox" class="vocab-select" id="selectVisible" ${visible.length&&selectedVisible===visible.length?'checked':''}> Вибрати всі видимі</label>
+ <button type="button" class="secondary" id="clearSelection" ${selectedWords.size?'':'disabled'}>Зняти всі позначки</button>
+ <span class="selection-count">Вибрано: <b>${selectedWords.size}</b></span>
+ <button type="button" class="secondary" id="moveSelected" ${selectedWords.size?'':'disabled'}>Перемістити в папку</button>
+ <button type="button" class="danger" id="deleteSelected" ${selectedWords.size?'':'disabled'}>Видалити вибрані</button>
+ </div>
+ ${visible.length?`<table class="vocab-table"><tr><th></th><th>Англійською</th><th>Переклад</th><th>Папка</th></tr>${visible.map(({x,index})=>`<tr><td><input type="checkbox" class="vocab-select" data-select-index="${index}" aria-label="Вибрати ${esc(x.word)}" ${selectedWords.has(x)?'checked':''}></td><td>${esc(x.word)}${practiced.has(x.word.toLowerCase())?'<span class="practiced-check" title="Правильно написано сьогодні" aria-label="Правильно написано сьогодні">✓</span>':''}</td><td>${esc(x.translation)}</td><td><span class="muted small">${esc(folderName(x.folderId))}</span></td></tr>`).join('')}</table>`:'<p class="muted">За вибраними умовами слова не знайдено.</p>'}`:'<p class="muted">Словник поки порожній.</p>';
+ const selectVisible=$('selectVisible');
+ if(selectVisible)selectVisible.onchange=()=>{visible.forEach(({x})=>selectVisible.checked?selectedWords.add(x):selectedWords.delete(x));renderVocab()};
+ $('clearSelection')?.addEventListener('click',()=>{selectedWords.clear();renderVocab()});
+ $('vocab').querySelectorAll('[data-select-index]').forEach(cb=>cb.onchange=()=>{const word=vocab[+cb.dataset.selectIndex];if(!word)return;cb.checked?selectedWords.add(word):selectedWords.delete(word);renderVocab()});
+ $('moveSelected')?.addEventListener('click',moveSelectedWords);
+ $('deleteSelected')?.addEventListener('click',deleteSelectedWords);
+}
+function deleteSelectedWords(){
+ const chosen=vocab.filter(x=>selectedWords.has(x));
+ if(!chosen.length)return;
+ showActionModal('Підтвердження видалення',`<p>Ви дійсно хочете видалити <b>${chosen.length}</b> вибраних слів?</p><p class="muted small">Цю дію не можна буде скасувати.</p>`,
+ `<button type="button" class="secondary" id="modalCancel">Скасувати</button><button type="button" class="danger" id="modalConfirm">Так, видалити</button>`);
+ $('modalCancel').onclick=closeActionModal;
+ $('modalConfirm').onclick=()=>{chosen.forEach(x=>deletedWords.add(x.word.toLowerCase()));vocab=vocab.filter(x=>!selectedWords.has(x));selectedWords.clear();closeActionModal();activeSet=null;current=null;save();updateSetOptions();start()};
+}
+function moveSelectedWords(){
+ const chosen=vocab.filter(x=>selectedWords.has(x));
+ if(!chosen.length)return;
+ const options=folders.map(f=>`<option value="${esc(f.id)}">${esc(f.name)}</option>`).join('');
+ showActionModal('Перемістити слова',`<p>Вибрано <b>${chosen.length}</b> слів. Оберіть папку призначення:</p><select id="destinationFolder">${options}</select>`,
+ `<button type="button" class="secondary" id="modalCancel">Скасувати</button><button type="button" id="modalContinue">Продовжити</button>`);
+ $('modalCancel').onclick=closeActionModal;
+ $('modalContinue').onclick=()=>{
+  const destination=$('destinationFolder').value;
+  const destinationName=folderName(destination);
+  showActionModal('Підтвердження переміщення',`<p>Перемістити <b>${chosen.length}</b> слів до папки «<b>${esc(destinationName)}</b>»?</p>`,
+  `<button type="button" class="secondary" id="modalCancel">Скасувати</button><button type="button" id="modalConfirm">Так, перемістити</button>`);
+  $('modalCancel').onclick=closeActionModal;
+  $('modalConfirm').onclick=()=>{chosen.forEach(x=>x.folderId=destination);selectedWords.clear();closeActionModal();save();updateSetOptions()};
+ };
 }
 $('vocabFolderFilter').onchange=()=>{vocabViewFolder=$('vocabFolderFilter').value;renderVocab()};
 $('vocabSort').onchange=()=>{vocabViewSort=$('vocabSort').value;renderVocab()};
 $('vocabSearch').oninput=()=>{vocabViewSearch=$('vocabSearch').value;renderVocab()};
 $('createFolder').onclick=()=>{let name=$('newFolderName').value.trim();if(!name)return alert('Вкажи назву папки.');if(folders.some(f=>f.name.toLowerCase()===name.toLowerCase()))return alert('Папка з такою назвою вже існує.');let id='folder_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);folders.push({id,name});$('newFolderName').value='';save();renderFolderControls();$('wordFolder').value=id};
-$('deleteAll').onclick=()=>{if(!vocab.length)return alert('Словник уже порожній.');if(!confirm(`Видалити всі ${vocab.length} слів зі словника? Цю дію неможливо скасувати.`))return;vocab.forEach(x=>deletedWords.add(x.word.toLowerCase()));baseWords.forEach(x=>deletedWords.add(x.word.toLowerCase()));vocab=[];activeSet=null;current=null;save();updateSetOptions();start();$('setStatus').textContent='Словник очищено. Додай або імпортуй нові слова.'};
+$('deleteAll').onclick=()=>{
+ if(!vocab.length)return alert('Словник уже порожній.');
+ showActionModal('Видалення всіх слів',`<p>Це видалить усі <b>${vocab.length}</b> слів. Папки залишаться без змін.</p><label for="adminPassword" class="small">Введіть пароль адміністратора:</label><input id="adminPassword" type="password" autocomplete="off" placeholder="Пароль"><div id="passwordError" class="modal-error" aria-live="polite"></div>`,
+ `<button type="button" class="secondary" id="modalCancel">Скасувати</button><button type="button" class="danger" id="passwordContinue">Продовжити</button>`);
+ $('modalCancel').onclick=closeActionModal;
+ $('passwordContinue').onclick=()=>{
+  if($('adminPassword').value!=='admin'){$('passwordError').textContent='Невірний пароль. Видалення неможливе.';$('adminPassword').focus();return}
+  showActionModal('Остаточне підтвердження',`<p>Видалити всі <b>${vocab.length}</b> слів?</p><p class="muted small">Папки та їхня структура будуть збережені. Цю дію не можна буде скасувати.</p>`,
+  `<button type="button" class="secondary" id="modalCancel">Скасувати</button><button type="button" class="danger" id="modalConfirm">Так, видалити всі слова</button>`);
+  $('modalCancel').onclick=closeActionModal;
+  $('modalConfirm').onclick=()=>{vocab.forEach(x=>deletedWords.add(x.word.toLowerCase()));baseWords.forEach(x=>deletedWords.add(x.word.toLowerCase()));vocab=[];selectedWords.clear();activeSet=null;current=null;closeActionModal();save();updateSetOptions();start();$('setStatus').textContent='Словник очищено. Додай або імпортуй нові слова.'};
+ };
+};
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 $('add').onclick=()=>{let word=$('word').value.trim(),translation=$('translation').value.trim(),folderId=$('wordFolder').value||'uncategorized';if(!word||!translation)return alert('Заповни слово та переклад');let old=vocab.find(x=>x.word.toLowerCase()===word.toLowerCase());if(old){old.translation=translation;old.folderId=folderId}else vocab.push({word,translation,folderId});deletedWords.delete(word.toLowerCase());$('word').value=$('translation').value='';save();updateSetOptions();activeSet=null;start()};
 $('import').onclick=()=>{let ta=$('bulk'),btn=$('import');if(ta.classList.contains('hidden')){ta.classList.remove('hidden');btn.textContent='Додати слова до словника';ta.focus();return}let lines=ta.value.split(/\r?\n/),added=0,updated=0,skipped=0;lines.forEach(line=>{if(!line.trim())return;let m=line.match(/^\s*(.*?)\s*[—–-]\s*(.*?)\s*$/);if(!m||!m[1].trim()||!m[2].trim()){skipped++;return}let word=m[1].trim(),translation=m[2].trim(),folderId=$('wordFolder').value||'uncategorized';deletedWords.delete(word.toLowerCase());let old=vocab.find(x=>x.word.toLowerCase()===word.toLowerCase());if(old){old.translation=translation;old.folderId=folderId;updated++}else{vocab.push({word,translation,folderId});added++}});ta.value='';ta.classList.add('hidden');btn.textContent='Відкрити імпорт';save();updateSetOptions();activeSet=null;start();alert(`Нових слів: ${added}. Переклади оновлено: ${updated}. Пропущено рядків: ${skipped}. Слова додано до папки «${folderName($('wordFolder').value)}».`)};
-$('export').onclick=()=>{let txt=vocab.map(x=>x.word+' — '+x.translation).join('\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'}));a.download='english-words.txt';a.click();URL.revokeObjectURL(a.href)};
+$('exportText').onclick=()=>{let txt=vocab.map(x=>x.word+' — '+x.translation).join('\n');let url=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));let a=document.createElement('a');a.href=url;a.download='english-words.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+// Structured JSON export/import. The legacy plain-text importer above remains independent.
+function normalizeFolderName(value){return String(value).normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('uk')}
+function normalizeWord(value){return String(value).normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('en')}
+function makeFolderId(used){let id;do{id='folder_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9)}while(used.has(id));used.add(id);return id}
+function downloadJson(data){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='english-word-builder-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+$('exportJson').onclick=()=>{
+ const data={format:'english-word-builder',version:1,exportedAt:new Date().toISOString(),folders:folders.filter(f=>f.id!=='uncategorized').map(f=>({id:f.id,name:f.name})),words:vocab.map(w=>({word:w.word,translation:w.translation,folderId:!w.folderId||w.folderId==='uncategorized'?null:w.folderId}))};
+ downloadJson(data);
+};
+$('importJson').onclick=()=>{$('jsonFile').click()};
+$('jsonFile').addEventListener('change',async event=>{
+ const file=event.target.files?.[0];event.target.value='';if(!file)return;
+ if(file.size>5*1024*1024){alert('Файл завеликий. Максимальний розмір — 5 МБ.');return}
+ try{const parsed=JSON.parse(await file.text());if(!parsed||typeof parsed!=='object'||parsed.format!=='english-word-builder'||parsed.version!==1||!Array.isArray(parsed.folders)||!Array.isArray(parsed.words))throw new Error('Формат файлу не підтримується. Очікується english-word-builder, версія 1, з масивами folders і words.');
+  pendingJsonData=parsed;
+  showActionModal('Імпорт структури словника',`<p>Файл: <b>${esc(file.name)}</b></p><p>Оберіть, як обробити дані:</p><label class="small">Режим імпорту<select id="jsonImportMode"><option value="merge">Доповнити існуючий словник</option><option value="replace">Повністю перезаписати словник</option></select></label>`, `<button type="button" class="secondary" id="modalCancel">Скасувати</button><button type="button" id="jsonAnalyze">Переглянути звіт</button>`);
+  $('modalCancel').onclick=closeActionModal;$('jsonAnalyze').onclick=()=>{const mode=$('jsonImportMode').value;try{pendingJsonPlan=buildJsonImportPlan(pendingJsonData,mode);showJsonImportPreview()}catch(err){closeActionModal();alert(err.message||'Не вдалося проаналізувати файл.')}};
+ }catch(err){alert(err.message==='Unexpected end of JSON input'||err instanceof SyntaxError?'Файл не є коректним JSON.':err.message||'Не вдалося прочитати файл.');}
+});
+let pendingJsonData=null,pendingJsonPlan=null;
+function buildJsonImportPlan(data,mode){
+ const validFolders=[],folderIds=new Set(),folderNames=new Set();let invalidFolders=0;
+ for(const raw of data.folders){if(!raw||typeof raw!=='object'||typeof raw.id!=='string'||!raw.id.trim()||typeof raw.name!=='string'||!raw.name.trim()||raw.name.trim().length>80||folderIds.has(raw.id)){invalidFolders++;continue}const normalized=normalizeFolderName(raw.name);if(!normalized||folderNames.has(normalized)){invalidFolders++;continue}folderIds.add(raw.id);folderNames.add(normalized);validFolders.push({id:raw.id,name:raw.name.trim()})}
+ const sourceWords=[];let invalidWords=0,duplicateWordsInFile=0;const importedWordKeys=new Set();
+ for(const raw of data.words){if(!raw||typeof raw!=='object'||typeof raw.word!=='string'||typeof raw.translation!=='string'){invalidWords++;continue}const word=raw.word.trim(),translation=raw.translation.trim();if(!word||!translation||word.length>120||translation.length>300){invalidWords++;continue}const key=normalizeWord(word);if(raw.folderId!==null&&raw.folderId!==undefined&&(typeof raw.folderId!=='string'||!folderIds.has(raw.folderId))){invalidWords++;continue}if(importedWordKeys.has(key)){duplicateWordsInFile++;continue}importedWordKeys.add(key);sourceWords.push({word,translation,folderId:raw.folderId==null?null:raw.folderId,key})}
+ const nextFolders=mode==='replace'?[{id:'uncategorized',name:'Без папки'}]:folders.map(f=>({...f}));
+ if(!nextFolders.some(f=>f.id==='uncategorized'))nextFolders.unshift({id:'uncategorized',name:'Без папки'});
+ const usedIds=new Set(nextFolders.map(f=>f.id));const byName=new Map(nextFolders.map(f=>[normalizeFolderName(f.name),f.id]));const folderMap=new Map();let matchedFolders=0,newFolders=0,emptyNewFolders=0;
+ for(const f of validFolders){const nameKey=normalizeFolderName(f.name);if(mode==='replace'&&nameKey===normalizeFolderName('Без папки')){folderMap.set(f.id,'uncategorized');matchedFolders++;continue}if(mode==='merge'&&byName.has(nameKey)){folderMap.set(f.id,byName.get(nameKey));matchedFolders++;continue}const id=makeFolderId(usedIds);nextFolders.push({id,name:f.name});folderMap.set(f.id,id);byName.set(nameKey,id);newFolders++}
+ const existingWords=mode==='replace'?[]:vocab;const existingKeys=new Set(existingWords.map(w=>normalizeWord(w.word)));const nextWords=mode==='replace'?[]:vocab.map(w=>({...w}));let duplicateWords=duplicateWordsInFile,addedWords=0;const folderWordCounts=new Map();
+ for(const w of sourceWords){if(existingKeys.has(w.key)){duplicateWords++;continue}const mapped=w.folderId===null?'uncategorized':folderMap.get(w.folderId);if(!mapped||!nextFolders.some(f=>f.id===mapped)){invalidWords++;continue}nextWords.push({word:w.word,translation:w.translation,folderId:mapped});existingKeys.add(w.key);addedWords++;folderWordCounts.set(mapped,(folderWordCounts.get(mapped)||0)+1)}
+ for(const f of nextFolders){if(!folders.some(old=>old.id===f.id)&&!folderWordCounts.has(f.id))emptyNewFolders++}
+ let nextDeleted=new Set(deletedWords);if(mode==='replace'){nextDeleted=new Set(baseWords.map(w=>normalizeWord(w.word)))}for(const w of nextWords)nextDeleted.delete(normalizeWord(w.word));
+ return {mode,nextFolders,nextWords,nextDeleted,validWords:sourceWords.length,rawWords:data.words.length,invalidWords,duplicateWords,invalidFolders,matchedFolders,newFolders,emptyNewFolders,addedWords,replaceWordCount:vocab.length,replaceFolderCount:folders.length};
+}
+function showJsonImportPreview(){const p=pendingJsonPlan;if(!p)return;const modeLabel=p.mode==='merge'?'Доповнення':'Повна заміна';const html=`<p>Режим: <b>${modeLabel}</b></p><ul><li>Слів у файлі: <b>${p.rawWords}</b></li><li>Нових слів: <b>${p.addedWords}</b></li><li>Дублікатів (будуть пропущені): <b>${p.duplicateWords}</b></li><li>Некоректних слів / невідомих папок: <b>${p.invalidWords}</b></li><li>Нових папок: <b>${p.newFolders}</b></li><li>Папок, які буде об’єднано з наявними: <b>${p.matchedFolders}</b></li><li>Нових порожніх папок: <b>${p.emptyNewFolders}</b></li><li>Некоректних папок: <b>${p.invalidFolders}</b></li></ul>${p.mode==='replace'?`<p class="modal-error">Буде видалено поточні ${p.replaceWordCount} слів і ${p.replaceFolderCount} папок. Прогрес навчання та нагороди залишаться без змін.</p>`:'<p class="small muted">Існуючі слова-дублікати не змінюватимуть переклад або папку.</p>'}`;
+ showActionModal('Попередній звіт імпорту',html,`<button type="button" class="secondary" id="modalCancel">Скасувати</button><button type="button" class="${p.mode==='replace'?'danger':''}" id="jsonCommit">${p.mode==='replace'?'Перейти до остаточного підтвердження':'Імпортувати'}</button>`);
+ $('modalCancel').onclick=()=>{pendingJsonData=null;pendingJsonPlan=null;closeActionModal()};$('jsonCommit').onclick=()=>{if(p.mode==='replace'){showActionModal('Остаточне підтвердження',`<p>Повністю замінити словник?</p><p class="modal-error">Буде видалено <b>${p.replaceWordCount}</b> слів і <b>${p.replaceFolderCount}</b> папок. Цю дію не можна буде скасувати.</p>`,`<button type="button" class="secondary" id="modalCancel">Скасувати</button><button type="button" class="danger" id="jsonFinalConfirm">Так, замінити</button>`);$('modalCancel').onclick=()=>{pendingJsonData=null;pendingJsonPlan=null;closeActionModal()};$('jsonFinalConfirm').onclick=commitJsonImport}else commitJsonImport()};
+}
+function commitJsonImport(){const p=pendingJsonPlan;if(!p)return;const keys=['wordbuilder_vocab','wordbuilder_folders','wordbuilder_deleted_words'];const backup=keys.map(key=>localStorage.getItem(key));try{localStorage.setItem(keys[0],JSON.stringify(p.nextWords));localStorage.setItem(keys[1],JSON.stringify(p.nextFolders));localStorage.setItem(keys[2],JSON.stringify([...p.nextDeleted]));}catch(err){keys.forEach((key,i)=>{try{if(backup[i]===null)localStorage.removeItem(key);else localStorage.setItem(key,backup[i])}catch(rollbackError){}});closeActionModal();pendingJsonData=null;pendingJsonPlan=null;alert('Не вдалося зберегти імпорт (можливо, недостатньо місця у сховищі). Попередні дані відновлено.');return}
+ vocab=p.nextWords;folders=p.nextFolders;deletedWords=p.nextDeleted;selectedWords.clear();activeSet=null;current=null;closeActionModal();renderVocab();renderFolderControls();updateSetOptions();start();const summary=`Імпорт завершено.\nДодано слів: ${p.addedWords}.\nПропущено дублікатів: ${p.duplicateWords}.\nНекоректних слів: ${p.invalidWords}.\nСтворено папок: ${p.newFolders}.\nОб’єднано з наявними папками: ${p.matchedFolders}.`;pendingJsonData=null;pendingJsonPlan=null;alert(summary);
+}
 function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function updateSetOptions(){renderFolderControls()}
 $('trainingFolder').onchange=()=>{activeSet=null;let count=$('trainingFolder').value==='all'?vocab.length:vocab.filter(x=>x.folderId===$('trainingFolder').value).length;$('setStatus').textContent=`У вибраній папці доступно ${count} слів.`};
@@ -189,5 +325,6 @@ $('extraLetters').onchange=()=>{$('extraCount').disabled=!$('extraLetters').chec
 $('extraCount').onchange=()=>{if(current&&$('extraLetters').checked)start()};
 
 $('dailyGoal').onchange=()=>{rewardData.goal=parseInt($('dailyGoal').value)||10;saveRewards();renderRewards()};
+$('actionModal').addEventListener('click',e=>{if(e.target===$('actionModal'))closeActionModal()});
 updateSetOptions();renderRewards();renderVocab();renderFolderControls();start();
 </script></body></html>
