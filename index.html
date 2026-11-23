@@ -71,10 +71,16 @@ button.danger:hover{background:#a91f1f}
 .set-completion-caption{font-size:15px;font-weight:700;color:#684600}
 .practiced-check{color:#16803c;font-size:1.15em;font-weight:900;margin-left:7px;white-space:nowrap}
 
+
+.app-header{display:flex;align-items:center;justify-content:space-between;gap:12px}.app-header h1{margin:0}.theme-toggle{width:42px;height:42px;padding:0;border-radius:50%;font-size:20px;background:#edf0f8;color:#243b80;border:1px solid #d6dbe7}
+.folder-item{cursor:pointer}.folder-item:hover{border-color:#9bb7ff}.folder-item-main{flex:1;cursor:pointer}.folder-check{width:18px;height:18px;accent-color:#243b80;flex:none}.folder-toolbar{align-items:center}.folder-toolbar #folderSelectionCount{margin-right:auto}.folder-actions{display:none}
+#oldImportSection{margin-top:16px;padding:14px;border:1px dashed #b8c2d6;border-radius:12px;background:#f7f8fc}#oldImportSection h3{margin:0 0 6px;font-size:16px}
+body[data-theme="dark"]{background:#111827;color:#e5e7eb}body[data-theme="dark"] main{background:#1f2937;box-shadow:0 8px 30px #0006}body[data-theme="dark"] .muted,body[data-theme="dark"] #hint,body[data-theme="dark"] .folder-count{color:#aab5c7}body[data-theme="dark"] section{border-color:#374151}body[data-theme="dark"] input,body[data-theme="dark"] select,body[data-theme="dark"] textarea{background-color:#273449;color:#e5e7eb;border-color:#4b5b73}body[data-theme="dark"] select{background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%2712%27 viewBox=%270 0 12 12%27%3E%3Cpath d=%27m2 4 4 4 4-4%27 fill=%27none%27 stroke=%27%23cbd5e1%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E")}body[data-theme="dark"] button.secondary,body[data-theme="dark"] .theme-toggle{background:#34445d;color:#e5e7eb;border-color:#50617b}body[data-theme="dark"] .folder-tools,body[data-theme="dark"] .bulk-actions,body[data-theme="dark"] #oldImportSection{background:#273449;border-color:#40516b}body[data-theme="dark"] .folder-item,body[data-theme="dark"] .stat{background:#202c3d;border-color:#40516b;color:#e5e7eb}body[data-theme="dark"] td,body[data-theme="dark"] th{border-color:#40516b}body[data-theme="dark"] .modal-card{background:#1f2937;color:#e5e7eb}body[data-theme="dark"] .slot{background:#273449;color:#e5e7eb}body[data-theme="dark"] .slot.filled{background:#34445d}body[data-theme="dark"] .letter{background:#34445d;color:#e5e7eb;border-color:#50617b}body[data-theme="dark"] #quest{background:linear-gradient(135deg,#473d25,#3c321e);border-color:#76612e}body[data-theme="dark"] #dailyProgress{background:#554827}body[data-theme="dark"] .set-completion{background:linear-gradient(135deg,#473d25,#3c321e);border-color:#76612e;color:#f8e7b0}body[data-theme="dark"] .set-completion-caption{color:#f8e7b0}
+
 </style>
 </head>
 <body><main>
-<h1>English Word Builder</h1>
+<div class="app-header"><h1>English Word Builder</h1><button type="button" id="themeToggle" class="theme-toggle" aria-label="Увімкнути темну тему" title="Змінити тему">🌙</button></div>
 <p class="muted">Додавай слова з перекладом і тренуй написання: складай слово з літер.</p>
 
 <section id="quest" style="border:0;padding-top:0;margin-top:18px">
@@ -99,9 +105,9 @@ button.danger:hover{background:#a91f1f}
 </section>
 <section style="border:0;padding-top:0;margin-top:18px">
 <h2>Мій словник</h2>
-<div class="folder-tools">
+<div class="folder-tools" id="foldersSection">
 <h3>Папки словника</h3>
-<div class="row"><input id="newFolderName" placeholder="Назва нової папки (наприклад, Animals)"><button id="createFolder">Створити папку</button></div>
+<div class="row folder-toolbar"><button type="button" id="createFolder">＋ Створити папку</button><span id="folderSelectionCount" class="small muted">Вибрано: 0</span><button type="button" class="secondary" id="renameSelectedFolder" disabled>Перейменувати</button><button type="button" class="danger" id="deleteSelectedFolders" disabled>Видалити</button><button type="button" class="secondary" id="clearFolderSelection" disabled>Зняти вибір</button></div>
 <div id="folderList" class="folder-list"></div>
 </div>
 <div class="folder-tools" id="dictionaryTransfer">
@@ -113,8 +119,9 @@ button.danger:hover{background:#a91f1f}
 <div class="row"><input id="word" placeholder="Англійське слово (наприклад, because)"><input id="translation" placeholder="Переклад (наприклад, тому що)"></div>
 <div class="row"><label>Додати до папки: <select id="wordFolder"></select></label></div>
 <div class="row"><button id="add">Додати слово</button><button class="secondary" id="import">Відкрити імпорт</button><button class="secondary" id="exportText">Експорт TXT</button><button class="danger" id="deleteAll">Видалити всі слова</button></div>
-<p class="small muted">Для імпорту: одне слово в рядку у форматі <code>word — переклад</code>. Усі імпортовані слова потраплять до вибраної папки.</p>
+<div id="oldImportSection"><h3>Звичайний імпорт слів (TXT / текст)</h3><p class="small muted">Окрема функція для додавання списку слів у вибрану папку.</p><p class="small muted">Для імпорту: одне слово в рядку у форматі <code>word — переклад</code>. Усі імпортовані слова потраплять до вибраної папки.</p>
 <textarea id="bulk" class="hidden" style="width:100%;height:110px;padding:10px;border:1px solid #d6dbe7;border-radius:10px" placeholder="apple — яблуко&#10;school — школа"></textarea>
+</div>
 <div class="dictionary-controls" aria-label="Пошук, фільтр і сортування словника">
 <label class="small">Папка
 <select id="vocabFolderFilter"><option value="all">Усі папки</option></select></label>
@@ -166,13 +173,21 @@ if(!localStorage.getItem('wordbuilder_practice_checkmark_migrated')){delete prac
 function markPracticed(word){let day=todayKey();if(!practicedByDay[day])practicedByDay[day]=[];let key=word.toLowerCase();if(!practicedByDay[day].includes(key)){practicedByDay[day].push(key);localStorage.setItem('wordbuilder_practiced_by_day',JSON.stringify(practicedByDay));renderVocab()}}
 function save(){localStorage.setItem('wordbuilder_vocab',JSON.stringify(vocab));localStorage.setItem('wordbuilder_deleted_words',JSON.stringify([...deletedWords]));saveFolders();renderVocab();renderFolderControls()}
 function folderName(id){return folders.find(f=>f.id===id)?.name||'Без папки'}
+const selectedFolders=new Set();
+function updateFolderToolbar(){const chosen=folders.filter(f=>selectedFolders.has(f.id));$('folderSelectionCount').textContent=`Вибрано: ${chosen.length}`;$('renameSelectedFolder').disabled=chosen.length!==1||chosen[0]?.id==='uncategorized';$('deleteSelectedFolders').disabled=!chosen.length||chosen.some(f=>f.id==='uncategorized');$('clearFolderSelection').disabled=!chosen.length}
 function renderFolderControls(){
  const selects=[$('wordFolder'),$('trainingFolder')];
  selects.forEach((sel,idx)=>{if(!sel)return;let previous=sel.value;sel.innerHTML='';if(idx===1){let opt=document.createElement('option');opt.value='all';opt.textContent=`Усі папки (${vocab.length} слів)`;sel.append(opt)}folders.forEach(f=>{let opt=document.createElement('option');opt.value=f.id;let count=vocab.filter(x=>x.folderId===f.id).length;opt.textContent=idx===1?`${f.name} (${count})`:f.name;sel.append(opt)});if([...sel.options].some(o=>o.value===previous))sel.value=previous;else sel.value=idx===1?'all':'uncategorized'});
- $('folderList').innerHTML=folders.map(f=>{let count=vocab.filter(x=>x.folderId===f.id).length;return `<div class="folder-item"><div class="folder-item-main"><span>📁 <b>${esc(f.name)}</b></span><span class="folder-count">${count} слів</span></div><div class="folder-actions">${f.id==='uncategorized'?'':`<button class="secondary" data-rename-folder="${esc(f.id)}">Перейменувати</button><button class="secondary" data-delete-folder="${esc(f.id)}">Видалити</button>`}</div></div>`}).join('');
- $('folderList').querySelectorAll('[data-rename-folder]').forEach(b=>b.onclick=()=>{let f=folders.find(x=>x.id===b.dataset.renameFolder);if(!f)return;let name=prompt('Нова назва папки:',f.name)?.trim();if(!name)return;if(folders.some(x=>x.id!==f.id&&x.name.toLowerCase()===name.toLowerCase()))return alert('Папка з такою назвою вже існує.');f.name=name;saveFolders();renderFolderControls()});
- $('folderList').querySelectorAll('[data-delete-folder]').forEach(b=>b.onclick=()=>{let f=folders.find(x=>x.id===b.dataset.deleteFolder);if(!f)return;let count=vocab.filter(x=>x.folderId===f.id).length;if(!confirm(`Видалити папку «${f.name}»? ${count} слів буде переміщено до папки «Без папки».`))return;vocab.forEach(x=>{if(x.folderId===f.id)x.folderId='uncategorized'});folders=folders.filter(x=>x.id!==f.id);if($('trainingFolder').value===f.id)$('trainingFolder').value='uncategorized';save();updateSetOptions();if(activeSet){activeSet=null;current=null;start()} });
+ $('folderList').innerHTML=folders.map(f=>{let count=vocab.filter(x=>x.folderId===f.id).length;return `<div class="folder-item" data-open-folder="${esc(f.id)}"><div class="folder-item-main"><input type="checkbox" class="folder-check" data-folder-check="${esc(f.id)}" ${f.id==='uncategorized'?'disabled title="Системну папку не можна змінювати"':''} ${selectedFolders.has(f.id)?'checked':''} aria-label="Вибрати папку ${esc(f.name)}"><span>📁 <b>${esc(f.name)}</b></span><span class="folder-count">${count} слів</span></div></div>`}).join('');
+ $('folderList').querySelectorAll('[data-folder-check]').forEach(cb=>cb.onchange=e=>{e.stopPropagation();cb.checked?selectedFolders.add(cb.dataset.folderCheck):selectedFolders.delete(cb.dataset.folderCheck);updateFolderToolbar()});
+ $('folderList').querySelectorAll('[data-open-folder]').forEach(row=>row.onclick=e=>{if(e.target.closest('input'))return;vocabViewFolder=row.dataset.openFolder;$('vocabFolderFilter').value=vocabViewFolder;renderVocab();$('vocab').scrollIntoView({behavior:'smooth',block:'start'})});
+ updateFolderToolbar();
 }
+function createFolder(){showActionModal('Створити папку',`<label class="small">Назва папки<input id="folderNameInput" maxlength="80" placeholder="Наприклад, Animals"></label><p id="folderNameError" class="modal-error"></p>`,`<button type="button" class="secondary" id="modalCancel">Відмінити</button><button type="button" id="modalCreateFolder">Створити</button>`);$('modalCancel').onclick=closeActionModal;$('modalCreateFolder').onclick=()=>{const name=$('folderNameInput').value.trim();if(!name){$('folderNameError').textContent='Вкажи назву папки.';return}if(folders.some(f=>f.name.trim().toLocaleLowerCase()===name.toLocaleLowerCase())){$('folderNameError').textContent='Папка з такою назвою вже існує.';return}const id='folder_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);folders.push({id,name});closeActionModal();save();renderFolderControls();$('wordFolder').value=id}}
+$('createFolder').onclick=createFolder;
+$('clearFolderSelection').onclick=()=>{selectedFolders.clear();renderFolderControls()};
+$('renameSelectedFolder').onclick=()=>{const chosen=folders.filter(f=>selectedFolders.has(f.id));if(chosen.length!==1||chosen[0].id==='uncategorized')return;const f=chosen[0];showActionModal('Перейменувати папку',`<label class="small">Нова назва<input id="renameFolderInput" maxlength="80" value="${esc(f.name)}"></label><p id="renameFolderError" class="modal-error"></p>`,`<button type="button" class="secondary" id="modalCancel">Відмінити</button><button type="button" id="modalRenameFolder">Зберегти</button>`);$('modalCancel').onclick=closeActionModal;$('modalRenameFolder').onclick=()=>{const name=$('renameFolderInput').value.trim();if(!name||folders.some(x=>x.id!==f.id&&x.name.trim().toLocaleLowerCase()===name.toLocaleLowerCase())){$('renameFolderError').textContent='Вкажи унікальну назву папки.';return}f.name=name;selectedFolders.clear();closeActionModal();save();renderFolderControls()}};
+$('deleteSelectedFolders').onclick=()=>{const chosen=folders.filter(f=>selectedFolders.has(f.id));if(!chosen.length||chosen.some(f=>f.id==='uncategorized'))return;const count=vocab.filter(w=>chosen.some(f=>f.id===w.folderId)).length;showActionModal('Видалити папки',`<p>Видалити <b>${chosen.length}</b> вибраних папок?</p><p>${count} слів буде переміщено до «Без папки».</p>`,`<button type="button" class="secondary" id="modalCancel">Відмінити</button><button type="button" class="danger" id="modalDeleteFolders">Видалити</button>`);$('modalCancel').onclick=closeActionModal;$('modalDeleteFolders').onclick=()=>{chosen.forEach(f=>vocab.forEach(w=>{if(w.folderId===f.id)w.folderId='uncategorized'}));const ids=new Set(chosen.map(f=>f.id));folders=folders.filter(f=>!ids.has(f.id));selectedFolders.clear();if(ids.has($('trainingFolder').value))$('trainingFolder').value='uncategorized';if(ids.has(vocabViewFolder)){vocabViewFolder='all';$('vocabFolderFilter').value='all'}closeActionModal();save();updateSetOptions();renderVocab();if(activeSet){activeSet=null;current=null;start()}}};
 // These view settings are intentionally kept only in memory; vocabulary storage is unchanged.
 let vocabViewFolder='all',vocabViewSort='word-asc',vocabViewSearch='';
 const selectedWords=new Set();
@@ -244,7 +259,7 @@ function moveSelectedWords(){
 $('vocabFolderFilter').onchange=()=>{vocabViewFolder=$('vocabFolderFilter').value;renderVocab()};
 $('vocabSort').onchange=()=>{vocabViewSort=$('vocabSort').value;renderVocab()};
 $('vocabSearch').oninput=()=>{vocabViewSearch=$('vocabSearch').value;renderVocab()};
-$('createFolder').onclick=()=>{let name=$('newFolderName').value.trim();if(!name)return alert('Вкажи назву папки.');if(folders.some(f=>f.name.toLowerCase()===name.toLowerCase()))return alert('Папка з такою назвою вже існує.');let id='folder_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);folders.push({id,name});$('newFolderName').value='';save();renderFolderControls();$('wordFolder').value=id};
+
 $('deleteAll').onclick=()=>{
  if(!vocab.length)return alert('Словник уже порожній.');
  showActionModal('Видалення всіх слів',`<p>Це видалить усі <b>${vocab.length}</b> слів. Папки залишаться без змін.</p><label for="adminPassword" class="small">Введіть пароль адміністратора:</label><input id="adminPassword" type="password" autocomplete="off" placeholder="Пароль"><div id="passwordError" class="modal-error" aria-live="polite"></div>`,
@@ -326,5 +341,6 @@ $('extraCount').onchange=()=>{if(current&&$('extraLetters').checked)start()};
 
 $('dailyGoal').onchange=()=>{rewardData.goal=parseInt($('dailyGoal').value)||10;saveRewards();renderRewards()};
 $('actionModal').addEventListener('click',e=>{if(e.target===$('actionModal'))closeActionModal()});
+const savedTheme=localStorage.getItem('wordbuilder_theme')||'day';function applyTheme(theme){document.body.dataset.theme=theme;$('themeToggle').textContent=theme==='dark'?'☀️':'🌙';$('themeToggle').setAttribute('aria-label',theme==='dark'?'Увімкнути світлу тему':'Увімкнути темну тему');localStorage.setItem('wordbuilder_theme',theme)}applyTheme(savedTheme);$('themeToggle').onclick=()=>applyTheme(document.body.dataset.theme==='dark'?'day':'dark');
 updateSetOptions();renderRewards();renderVocab();renderFolderControls();start();
 </script></body></html>
